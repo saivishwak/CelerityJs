@@ -14,7 +14,7 @@ const App = () => {
             <h1>Counter</h1>
             <h2>{counter}</h2>
             <button onClick={click}>Click</button>
-            <Comp1 />
+            <Comp1 data={{title:"hello"}}/>
         </div>
     );
 };
