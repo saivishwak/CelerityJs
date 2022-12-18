@@ -20,5 +20,4 @@ const App = () => {
 };
 
 const root = document.getElementById("root");
-//console.log(App() as FrameworkInterface);
 Celerity.render(<App />, root);
