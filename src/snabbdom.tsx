@@ -10,6 +10,8 @@ import {
     h,
 } from "snabbdom";
 
+const stateSymbol = Symbol("_state_");
+
 const patch = init([
     // Init patch function with chosen modules
     classModule, // makes it easy to toggle classes
@@ -35,7 +37,7 @@ class CelerityComponent {
     }
 
     updateState() {
-        this._vNode = patch(this._vNode, this.render());
+        this._vNode = patch(this._vNode, this.render(this.props));
     }
 }
 
@@ -45,8 +47,18 @@ const Celerity = {
     createElement: function (type, props, ...children) {
         let element;
         if (type.prototype && type.prototype.isClassComponent) {
-            const componentInstance = new type(props);
-            element = componentInstance.render();
+            let initialState = null;
+            let initialProps = {};
+            for (key in props) {
+                if (key === "state") {
+                    initialState = props[key];
+                } else {
+                    initialProps[key] = props[key];
+                }
+            }
+            const componentInstance = new type(initialState);
+            componentInstance.props = initialProps;
+            element = componentInstance.render(initialProps);
             componentInstance._vNode = element;
             componentInstance._vNode.data.hook = {
                 insert: (vnode) => {

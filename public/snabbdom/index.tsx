@@ -1,7 +1,7 @@
 import { Celerity, CelerityComponent } from "../../src/index.tsx";
 
 class H extends CelerityComponent {
-    render() {
+    render(props) {
         const decrement = () => {
             const oldVal = this.state.count;
             this.setState({
@@ -12,9 +12,11 @@ class H extends CelerityComponent {
 
         return (
             <div>
-                <h1>{this.state.title}</h1>
+                <h1>{props.title}</h1>
                 <h2>Dec: {this.state.count} </h2>
                 <button on={{ click: decrement }}>click 2</button>
+                <button on={{ click: props.click }}>ParentClick</button>
+                <p>{props.count}</p>
             </div>
         );
     }
@@ -29,7 +31,7 @@ class H extends CelerityComponent {
 }
 
 class App extends CelerityComponent {
-    render() {
+    render(props) {
         const increment = () => {
             const oldCount = this.state.count;
             this.setState({
@@ -37,12 +39,26 @@ class App extends CelerityComponent {
                 count: oldCount + 1,
             });
         };
+
+        const parentClick = () => {
+            const oldCount = this.state.count;
+            this.setState({
+                ...this.state,
+                count: oldCount - 1,
+            });
+        };
+
         return (
             <div>
-                {/*<H title="Hello" count={100} />*/}
                 <h1>{this.state.count}</h1>
                 <button on={{ click: increment }}>Click</button>
-                {this.state.count == 2 ? <H title="Hello" count={100} /> : null}
+                <H
+                    state={{ title: "Hello", count: 100 }}
+                    click={parentClick}
+                    title="hello"
+                    count={this.state.count}
+                />
+                {this.state.count % 2 == 0 ? <h1>Wohooo</h1> : null}
             </div>
         );
     }
@@ -53,4 +69,4 @@ class App extends CelerityComponent {
 }
 
 const root = document.getElementById("root");
-Celerity.render(<App count={0} />, root);
+Celerity.render(<App state={{ count: 0 }} title="he" />, root);
