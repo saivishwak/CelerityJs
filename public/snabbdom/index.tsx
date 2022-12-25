@@ -1,4 +1,5 @@
 import { Celerity, CelerityComponent } from "../../src/index.tsx";
+import { Route, Router } from "./route.tsx";
 
 class H extends CelerityComponent {
     render(props) {
@@ -8,6 +9,9 @@ class H extends CelerityComponent {
                 ...this.state,
                 count: oldVal - 1,
             });
+
+            history.pushState(null, "", "/123");
+            window.dispatchEvent(new Event("popstate"));
         };
 
         return (
@@ -68,5 +72,35 @@ class App extends CelerityComponent {
     }
 }
 
+class Test extends CelerityComponent {
+    render(props) {
+        return <h1>test</h1>;
+    }
+}
+
+{
+    /*<Route path="/" component={<App state={{ count: 0 }} title="he" />} />
+    <Route path="/123" component={<H state={{ count: 0, title:"route" }} title="route he" count={100} />} />*/
+}
+
+{
+    /*<Route path="/" component={<Test />} />*/
+}
+
 const root = document.getElementById("root");
-Celerity.render(<App state={{ count: 0 }} title="he" />, root);
+Celerity.render(
+    <Router>
+        <Route path="/" component={<App state={{ count: 0 }} title="he" />} />
+        <Route
+            path="/123"
+            component={
+                <H
+                    state={{ count: 0, title: "route" }}
+                    title="route he"
+                    count={100}
+                />
+            }
+        />
+    </Router>,
+    root
+);

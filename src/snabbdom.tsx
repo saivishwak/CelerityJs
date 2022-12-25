@@ -25,7 +25,7 @@ class CelerityComponent {
         this.state = initialState;
     }
 
-    render() {}
+    render(props = null, children = null) {}
 
     componentDidMount() {}
 
@@ -42,11 +42,13 @@ class CelerityComponent {
 }
 
 CelerityComponent.prototype.isClassComponent = true;
+let wipParent = null;
 
 const Celerity = {
     createElement: function (type, props, ...children) {
         let element;
-        if (type.prototype && type.prototype.isClassComponent) {
+        console.log(type, props, children);
+        if (type.prototype && type.prototype.isClassComponent) { 
             let initialState = null;
             let initialProps = {};
             for (key in props) {
@@ -58,25 +60,32 @@ const Celerity = {
             }
             const componentInstance = new type(initialState);
             componentInstance.props = initialProps;
-            element = componentInstance.render(initialProps);
+            element = componentInstance.render(initialProps, [...children]);
             componentInstance._vNode = element;
-            componentInstance._vNode.data.hook = {
-                insert: (vnode) => {
-                    componentInstance.componentDidMount(vnode);
-                },
-                destroy: (vnode) => {
-                    componentInstance.componentDestroyed(vnode);
-                },
-            };
+            if (componentInstance._vNode.data) {
+                componentInstance._vNode.data.hook = {
+                    insert: (vnode) => {
+                        componentInstance.componentDidMount(vnode);
+                    },
+                    destroy: (vnode) => {
+                        componentInstance.componentDestroyed(vnode);
+                    },
+                };
+            } 
         } else if (type instanceof Function) {
             element = type(props);
         } else {
+            //Adding here for nested compoments to work..!
+            if (children.length == 1 && children[0] instanceof Array){
+                children = children[0];
+            }
             element = h(type, props, children);
         }
         return element;
     },
 
     render: function (node, container) {
+        console.log("Main render", node);
         patch(container, node);
     },
 };
