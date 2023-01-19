@@ -37,7 +37,10 @@ class CelerityComponent {
     }
 
     updateState() {
-        this._vNode = patch(this._vNode, this.render(this.props));
+        this._vNode = patch(
+            this._vNode,
+            this.render(this.props, this._children)
+        );
     }
 }
 
@@ -46,9 +49,10 @@ let wipParent = null;
 
 const Celerity = {
     createElement: function (type, props, ...children) {
+        debugger;
         let element;
         console.log(type, props, children);
-        if (type.prototype && type.prototype.isClassComponent) { 
+        if (type.prototype && type.prototype.isClassComponent) {
             let initialState = null;
             let initialProps = {};
             for (key in props) {
@@ -62,6 +66,7 @@ const Celerity = {
             componentInstance.props = initialProps;
             element = componentInstance.render(initialProps, [...children]);
             componentInstance._vNode = element;
+            componentInstance._children = [...children];
             if (componentInstance._vNode.data) {
                 componentInstance._vNode.data.hook = {
                     insert: (vnode) => {
@@ -71,14 +76,15 @@ const Celerity = {
                         componentInstance.componentDestroyed(vnode);
                     },
                 };
-            } 
+            }
         } else if (type instanceof Function) {
             element = type(props);
         } else {
             //Adding here for nested compoments to work..!
-            if (children.length == 1 && children[0] instanceof Array){
+            if (children.length == 1 && children[0] instanceof Array) {
                 children = children[0];
             }
+            debugger;
             element = h(type, props, children);
         }
         return element;
@@ -86,8 +92,15 @@ const Celerity = {
 
     render: function (node, container) {
         console.log("Main render", node);
-        patch(container, node);
+        wipParent = patch(container, node);
     },
 };
 
-export { Celerity, CelerityComponent };
+const History = {
+    push: function (path) {
+        history.pushState(null, "", path);
+        window.dispatchEvent(new Event("popstate"));
+    },
+};
+
+export { Celerity, CelerityComponent, History };
